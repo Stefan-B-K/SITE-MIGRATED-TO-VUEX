@@ -35,4 +35,6 @@ const getters = {
   }
 }
 
-export default {  state, getters }
+export default {
+  namespaced: true,
+  state, getters }

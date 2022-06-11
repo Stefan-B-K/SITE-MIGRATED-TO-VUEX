@@ -9,7 +9,7 @@ const getters = {
     return state.items
   },
   totalSum(state) {
-    return state.total
+    return state.total.toFixed(2)
   },
   quantity(state) {
     return state.qty
@@ -18,7 +18,7 @@ const getters = {
 
 const mutations = {
   addProductToCart (state, payload) {
-    const productData = payload.product;
+    const productData = payload;
     const productInCartIndex = state.items.findIndex(
       (ci) => ci.productId === productData.id
     );
@@ -40,7 +40,7 @@ const mutations = {
   },
 
   removeProductFromCart (state, payload) {
-    const prodId = payload.productId;
+    const prodId = payload.prodId;
     const productInCartIndex = state.items.findIndex(
       (cartItem) => cartItem.productId === prodId
     );
@@ -52,8 +52,10 @@ const mutations = {
 };
 
 const actions = {
-  addToCart ({ commit }, payload) {
-    commit('addProductToCart', payload);
+  addToCart ({ commit, rootGetters }, payload) {
+    const prodId = payload.id
+    const product = rootGetters['products/products'].find(prod => prod.id === prodId)
+    commit('addProductToCart', product);
   },
   removeFromCart ({ commit }, payload) {
     commit('removeProductFromCart', payload);
