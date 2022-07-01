@@ -1,22 +1,14 @@
 <template>
   <section>
     <ul>
-      <product-item
-        v-for="prod in products"
-        :key="prod.id"
-        :id="prod.id"
-        :title="prod.title"
-        :image="prod.image"
-        :description="prod.description"
-        :price="prod.price"
-      ></product-item>
+      <product-item v-for="prod in products" @addToCart="addToCart" :key="prod.id" :product="prod" />
     </ul>
   </section>
 </template>
 
 
 <script>
-import  { mapGetters } from 'vuex'
+import  { mapGetters, mapActions } from 'vuex'
 import ProductItem from '../components/products/ProductItem.vue';
 
 export default {
@@ -25,7 +17,12 @@ export default {
   },
   computed: {
     ...mapGetters('products', ['products'])
-  }
+  },
+  methods: {
+    ...mapActions({
+      addToCart: 'cart/addToCart'
+    }),
+  },
 };
 </script>
 
