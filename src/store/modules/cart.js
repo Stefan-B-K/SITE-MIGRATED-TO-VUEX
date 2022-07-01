@@ -1,68 +1,43 @@
-const state = {
-  items: [],
-  total: 0,
-  qty: 0
-};
-
-const getters = {
-  items(state) {
-    return state.items
-  },
-  totalSum(state) {
-    return state.total.toFixed(2)
-  },
-  quantity(state) {
-    return state.qty
-  }
-};
-
-const mutations = {
-  addProductToCart (state, payload) {
-    const productData = payload;
-    const productInCartIndex = state.items.findIndex(
-      (ci) => ci.productId === productData.id
-    );
-
-    if (productInCartIndex >= 0) {
-      state.items[productInCartIndex].qty++;
-    } else {
-      const newItem = {
-        productId: productData.id,
-        title: productData.title,
-        image: productData.image,
-        price: productData.price,
-        qty: 1
-      };
-      state.items.push(newItem);
-    }
-    state.qty++;
-    state.total += productData.price;
-  },
-
-  removeProductFromCart (state, payload) {
-    const prodId = payload.prodId;
-    const productInCartIndex = state.items.findIndex(
-      (cartItem) => cartItem.productId === prodId
-    );
-    const prodData = state.items[productInCartIndex];
-    state.items.splice(productInCartIndex, 1);
-    state.qty -= prodData.qty;
-    state.total -= prodData.price * prodData.qty;
-  }
-};
-
-const actions = {
-  addToCart ({ commit, rootGetters }, payload) {
-    const prodId = payload.id
-    const product = rootGetters['products/products'].find(prod => prod.id === prodId)
-    commit('addProductToCart', product);
-  },
-  removeFromCart ({ commit }, payload) {
-    commit('removeProductFromCart', payload);
-  }
-};
+import { cart } from '../default';
 
 export default {
   namespaced: true,
-  state, getters, actions, mutations
-};
+  state: { ...cart },
+  getters: {
+    items: state => state.items,
+    totalSum: state => state.total.toFixed(2),
+    quantity: state => state.qty
+  },
+  mutations: {
+    set(state, payload) {
+      const index = state.items.findIndex(el => el.id === payload.product.id)
+      const item = index !== -1 ? state.items[index] : null
+      
+      if (payload.remove) {
+        state.qty -= item.qty;
+        state.total -= item.price * item.qty;
+        state.items = state.items.filter(el => el.id !== payload.product.id)
+        return
+      }
+
+      const realIndex = item ? index : state.items.length
+      const qty = item ? item.qty + 1 : 1
+      const total = payload.product.price * qty.toFixed(2)
+      state.items[realIndex] = {
+          ...payload.product,
+          qty: qty,
+          total: total
+      }
+      state.qty++;
+      state.total += payload.product.price;
+    },
+  },
+  actions: {
+    addToCart ({ commit }, product) {
+      commit('set', { product });
+    },
+    removeFromCart({ commit }, product) {
+      commit('set', { product, remove: true });
+    }
+  }
+}
